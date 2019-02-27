@@ -1,0 +1,44 @@
+#######################################
+# Syntax Coloring Map For LPS22HH
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+LPS22HHSensor	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+ReadID	KEYWORD2
+Enable	KEYWORD2
+Disable	KEYWORD2
+GetOutputDataRate	KEYWORD2
+SetOutputDataRate	KEYWORD2
+GetPressure	KEYWORD2
+Get_PRESS_DRDY_Status	KEYWORD2
+GetTemperature	KEYWORD2
+Get_TEMP_DRDY_Status	KEYWORD2
+Read_Reg	KEYWORD2
+Write_Reg	KEYWORD2
+Get_FIFO_Data	KEYWORD2
+Get_FIFO_FTh_Status	KEYWORD2
+Get_FIFO_Full_Status	KEYWORD2
+Get_FIFO_Ovr_Status	KEYWORD2
+Get_FIFO_Level	KEYWORD2
+Reset_FIFO_Interrupt	KEYWORD2
+Set_FIFO_Interrupt	KEYWORD2
+Set_FIFO_Mode	KEYWORD2
+Set_FIFO_Watermark_Level	KEYWORD2
+Stop_FIFO_On_Watermark	KEYWORD2
+Set_One_Shot	KEYWORD2
+Get_One_Shot_Status	KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+LPS22HH_OK	LITERAL1
+LPS22HH_ERROR	LITERAL1
