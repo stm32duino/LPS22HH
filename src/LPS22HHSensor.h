@@ -71,6 +71,8 @@ class LPS22HHSensor
   public:
     LPS22HHSensor(TwoWire *i2c, uint8_t address=LPS22HH_I2C_ADD_H);
     LPS22HHSensor(SPIClass *spi, int cs_pin, uint32_t spi_speed=2000000);
+    LPS22HHStatusTypeDef begin();
+    LPS22HHStatusTypeDef end();
     LPS22HHStatusTypeDef ReadID(uint8_t *Id);
     LPS22HHStatusTypeDef Enable();
     LPS22HHStatusTypeDef Disable();
