@@ -53,42 +53,7 @@ LPS22HHSensor::LPS22HHSensor(TwoWire *i2c, uint8_t address) : dev_i2c(i2c), addr
   reg_ctx.write_reg = LPS22HH_io_write;
   reg_ctx.read_reg = LPS22HH_io_read;
   reg_ctx.handle = (void *)this;
-  
-  /* Disable MIPI I3C(SM) interface */
-  if (lps22hh_i3c_interface_set(&reg_ctx, LPS22HH_I3C_DISABLE) != LPS22HH_OK)
-  {
-    return;
-  }
-
-  /* Power down the device, set Low Noise Enable (bit 5), clear One Shot (bit 4) */
-  if (lps22hh_data_rate_set(&reg_ctx, (lps22hh_odr_t)(LPS22HH_POWER_DOWN | 0x10)) != LPS22HH_OK)
-  {
-    return;
-  }
-
-  /* Disable low-pass filter on LPS22HH pressure data */
-  if (lps22hh_lp_bandwidth_set(&reg_ctx, LPS22HH_LPF_ODR_DIV_2) != LPS22HH_OK)
-  {
-    return;
-  }
-
-  /* Set block data update mode */
-  if (lps22hh_block_data_update_set(&reg_ctx, PROPERTY_ENABLE) != LPS22HH_OK)
-  {
-    return;
-  }
-
-  /* Set autoincrement for multi-byte read/write */
-  if (lps22hh_auto_increment_set(&reg_ctx, PROPERTY_ENABLE) != LPS22HH_OK)
-  {
-    return;
-  }
-
-  last_odr = LPS22HH_25_Hz;
   enabled = 0;
-
-
-  return;
 }
 
 /** Constructor
@@ -101,47 +66,80 @@ LPS22HHSensor::LPS22HHSensor(SPIClass *spi, int cs_pin, uint32_t spi_speed) : de
   reg_ctx.write_reg = LPS22HH_io_write;
   reg_ctx.read_reg = LPS22HH_io_read;
   reg_ctx.handle = (void *)this;
-
-  // Configure CS pin
-  pinMode(cs_pin, OUTPUT);
-  digitalWrite(cs_pin, HIGH); 
   dev_i2c = NULL;
   address = 0;
+  enabled = 0;
+}
+
+/**
+ * @brief  Configure the sensor in order to be used
+ * @retval 0 in case of success, an error code otherwise
+ */
+LPS22HHStatusTypeDef LPS22HHSensor::begin()
+{
+  if(dev_spi)
+  {
+    // Configure CS pin
+    pinMode(cs_pin, OUTPUT);
+    digitalWrite(cs_pin, HIGH); 
+  }
 
   /* Disable MIPI I3C(SM) interface */
   if (lps22hh_i3c_interface_set(&reg_ctx, LPS22HH_I3C_DISABLE) != LPS22HH_OK)
   {
-    return;
+    return LPS22HH_ERROR;
   }
 
   /* Power down the device, set Low Noise Enable (bit 5), clear One Shot (bit 4) */
   if (lps22hh_data_rate_set(&reg_ctx, (lps22hh_odr_t)(LPS22HH_POWER_DOWN | 0x10)) != LPS22HH_OK)
   {
-    return;
+    return LPS22HH_ERROR;
   }
 
   /* Disable low-pass filter on LPS22HH pressure data */
   if (lps22hh_lp_bandwidth_set(&reg_ctx, LPS22HH_LPF_ODR_DIV_2) != LPS22HH_OK)
   {
-    return;
+    return LPS22HH_ERROR;
   }
 
   /* Set block data update mode */
   if (lps22hh_block_data_update_set(&reg_ctx, PROPERTY_ENABLE) != LPS22HH_OK)
   {
-    return;
+    return LPS22HH_ERROR;
   }
 
   /* Set autoincrement for multi-byte read/write */
   if (lps22hh_auto_increment_set(&reg_ctx, PROPERTY_ENABLE) != LPS22HH_OK)
   {
-    return;
+    return LPS22HH_ERROR;
   }
 
   last_odr = LPS22HH_25_Hz;  
   enabled = 0;
 
-  return;
+  return LPS22HH_OK;
+}
+
+/**
+ * @brief  Disable the sensor and relative resources
+ * @retval 0 in case of success, an error code otherwise
+ */
+LPS22HHStatusTypeDef LPS22HHSensor::end()
+{
+  /* Disable pressure and temperature sensor */
+  if (Disable() != LPS22HH_OK)
+  {
+    return LPS22HH_ERROR;
+  }
+
+  /* Reset CS configuration */
+  if(dev_spi)
+  {
+    // Configure CS pin
+    pinMode(cs_pin, INPUT); 
+  }
+
+  return LPS22HH_OK;
 }
 
 /**
