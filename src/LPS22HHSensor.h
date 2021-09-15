@@ -54,23 +54,21 @@
 
 /* Typedefs ------------------------------------------------------------------*/
 
-typedef enum
-{
+typedef enum {
   LPS22HH_OK = 0,
-  LPS22HH_ERROR =-1
+  LPS22HH_ERROR = -1
 } LPS22HHStatusTypeDef;
 
 
 /* Class Declaration ---------------------------------------------------------*/
-   
+
 /**
  * Abstract class of a LPS22HH pressure sensor.
  */
-class LPS22HHSensor
-{
+class LPS22HHSensor {
   public:
-    LPS22HHSensor(TwoWire *i2c, uint8_t address=LPS22HH_I2C_ADD_H);
-    LPS22HHSensor(SPIClass *spi, int cs_pin, uint32_t spi_speed=2000000);
+    LPS22HHSensor(TwoWire *i2c, uint8_t address = LPS22HH_I2C_ADD_H);
+    LPS22HHSensor(SPIClass *spi, int cs_pin, uint32_t spi_speed = 2000000);
     LPS22HHStatusTypeDef begin();
     LPS22HHStatusTypeDef end();
     LPS22HHStatusTypeDef ReadID(uint8_t *Id);
@@ -80,13 +78,13 @@ class LPS22HHSensor
     LPS22HHStatusTypeDef SetOutputDataRate(float Odr);
     LPS22HHStatusTypeDef GetPressure(float *Value);
     LPS22HHStatusTypeDef Get_PRESS_DRDY_Status(uint8_t *Status);
-    
+
     LPS22HHStatusTypeDef GetTemperature(float *Value);
     LPS22HHStatusTypeDef Get_TEMP_DRDY_Status(uint8_t *Status);
-    
+
     LPS22HHStatusTypeDef Read_Reg(uint8_t reg, uint8_t *Data);
     LPS22HHStatusTypeDef Write_Reg(uint8_t reg, uint8_t Data);
-    
+
     LPS22HHStatusTypeDef Get_FIFO_Data(float *Press, float *Temp);
     LPS22HHStatusTypeDef Get_FIFO_FTh_Status(uint8_t *Status);
     LPS22HHStatusTypeDef Get_FIFO_Full_Status(uint8_t *Status);
@@ -97,11 +95,11 @@ class LPS22HHSensor
     LPS22HHStatusTypeDef Set_FIFO_Mode(uint8_t Mode);
     LPS22HHStatusTypeDef Set_FIFO_Watermark_Level(uint8_t Watermark);
     LPS22HHStatusTypeDef Stop_FIFO_On_Watermark(uint8_t Stop);
-    
+
     LPS22HHStatusTypeDef Set_One_Shot();
     LPS22HHStatusTypeDef Get_One_Shot_Status(uint8_t *Status);
 
-    
+
     /**
      * @brief Utility function to read data.
      * @param  pBuffer: pointer to data to be read.
@@ -109,8 +107,8 @@ class LPS22HHSensor
      * @param  NumByteToRead: number of bytes to be read.
      * @retval 0 if ok, an error code otherwise.
      */
-    uint8_t IO_Read(uint8_t* pBuffer, uint8_t RegisterAddr, uint16_t NumByteToRead)
-    {        
+    uint8_t IO_Read(uint8_t *pBuffer, uint8_t RegisterAddr, uint16_t NumByteToRead)
+    {
       if (dev_spi) {
         dev_spi->beginTransaction(SPISettings(spi_speed, MSBFIRST, SPI_MODE3));
 
@@ -119,17 +117,17 @@ class LPS22HHSensor
         /* Write Reg Address */
         dev_spi->transfer(RegisterAddr | 0x80);
         /* Read the data */
-        for (uint16_t i=0; i<NumByteToRead; i++) {
-          *(pBuffer+i) = dev_spi->transfer(0x00);
+        for (uint16_t i = 0; i < NumByteToRead; i++) {
+          *(pBuffer + i) = dev_spi->transfer(0x00);
         }
-         
+
         digitalWrite(cs_pin, HIGH);
 
         dev_spi->endTransaction();
 
         return 0;
       }
-		
+
       if (dev_i2c) {
         dev_i2c->beginTransmission(((uint8_t)(((address) >> 1) & 0x7F)));
         dev_i2c->write(RegisterAddr);
@@ -137,7 +135,7 @@ class LPS22HHSensor
 
         dev_i2c->requestFrom(((uint8_t)(((address) >> 1) & 0x7F)), (uint8_t) NumByteToRead);
 
-        int i=0;
+        int i = 0;
         while (dev_i2c->available()) {
           pBuffer[i] = dev_i2c->read();
           i++;
@@ -148,7 +146,7 @@ class LPS22HHSensor
 
       return 1;
     }
-    
+
     /**
      * @brief Utility function to write data.
      * @param  pBuffer: pointer to data to be written.
@@ -156,8 +154,8 @@ class LPS22HHSensor
      * @param  NumByteToWrite: number of bytes to write.
      * @retval 0 if ok, an error code otherwise.
      */
-    uint8_t IO_Write(uint8_t* pBuffer, uint8_t RegisterAddr, uint16_t NumByteToWrite)
-    {  
+    uint8_t IO_Write(uint8_t *pBuffer, uint8_t RegisterAddr, uint16_t NumByteToWrite)
+    {
       if (dev_spi) {
         dev_spi->beginTransaction(SPISettings(spi_speed, MSBFIRST, SPI_MODE3));
 
@@ -166,7 +164,7 @@ class LPS22HHSensor
         /* Write Reg Address */
         dev_spi->transfer(RegisterAddr);
         /* Write the data */
-        for (uint16_t i=0; i<NumByteToWrite; i++) {
+        for (uint16_t i = 0; i < NumByteToWrite; i++) {
           dev_spi->transfer(pBuffer[i]);
         }
 
@@ -174,9 +172,9 @@ class LPS22HHSensor
 
         dev_spi->endTransaction();
 
-        return 0;                    
+        return 0;
       }
-  
+
       if (dev_i2c) {
         dev_i2c->beginTransmission(((uint8_t)(((address) >> 1) & 0x7F)));
 
@@ -194,32 +192,32 @@ class LPS22HHSensor
     }
 
   private:
-	LPS22HHStatusTypeDef SetOutputDataRate_When_Enabled(float Odr);
-	LPS22HHStatusTypeDef SetOutputDataRate_When_Disabled(float Odr);
+    LPS22HHStatusTypeDef SetOutputDataRate_When_Enabled(float Odr);
+    LPS22HHStatusTypeDef SetOutputDataRate_When_Disabled(float Odr);
 
     /* Helper classes. */
     TwoWire *dev_i2c;
     SPIClass *dev_spi;
-    
+
     /* Configuration */
     uint8_t address;
     int cs_pin;
     uint32_t spi_speed;
-    
+
     lps22hh_odr_t last_odr;
     uint8_t enabled;
-    
+
     lps22hh_ctx_t reg_ctx;
-    
+
 };
 
 #ifdef __cplusplus
- extern "C" {
+extern "C" {
 #endif
-int32_t LPS22HH_io_write( void *handle, uint8_t WriteAddr, uint8_t *pBuffer, uint16_t nBytesToWrite );
-int32_t LPS22HH_io_read( void *handle, uint8_t ReadAddr, uint8_t *pBuffer, uint16_t nBytesToRead );
+int32_t LPS22HH_io_write(void *handle, uint8_t WriteAddr, uint8_t *pBuffer, uint16_t nBytesToWrite);
+int32_t LPS22HH_io_read(void *handle, uint8_t ReadAddr, uint8_t *pBuffer, uint16_t nBytesToRead);
 #ifdef __cplusplus
-  }
+}
 #endif
 
 #endif
