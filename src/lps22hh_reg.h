@@ -40,7 +40,7 @@
 #define LPS22HH_DRIVER_H
 
 #ifdef __cplusplus
-  extern "C" {
+extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
@@ -72,22 +72,22 @@
   *
   */
 
-typedef union{
+typedef union {
   int16_t i16bit[3];
   uint8_t u8bit[6];
 } axis3bit16_t;
 
-typedef union{
+typedef union {
   int16_t i16bit;
   uint8_t u8bit[2];
 } axis1bit16_t;
 
-typedef union{
+typedef union {
   int32_t i32bit[3];
   uint8_t u8bit[12];
 } axis3bit32_t;
 
-typedef union{
+typedef union {
   int32_t i32bit;
   uint8_t u8bit[4];
 } axis1bit32_t;
@@ -97,7 +97,7 @@ typedef union{
   *
   */
 
-typedef struct{
+typedef struct {
   uint8_t bit0       : 1;
   uint8_t bit1       : 1;
   uint8_t bit2       : 1;
@@ -126,8 +126,8 @@ typedef struct{
   *
   */
 
-typedef int32_t (*lps22hh_write_ptr)(void *, uint8_t, uint8_t*, uint16_t);
-typedef int32_t (*lps22hh_read_ptr) (void *, uint8_t, uint8_t*, uint16_t);
+typedef int32_t (*lps22hh_write_ptr)(void *, uint8_t, uint8_t *, uint16_t);
+typedef int32_t (*lps22hh_read_ptr)(void *, uint8_t, uint8_t *, uint16_t);
 
 typedef struct {
   /** Component mandatory fields **/
@@ -313,7 +313,7 @@ typedef struct {
   * @{
   *
   */
-typedef union{
+typedef union {
   lps22hh_interrupt_cfg_t        interrupt_cfg;
   lps22hh_if_ctrl_t              if_ctrl;
   lps22hh_ctrl_reg1_t            ctrl_reg1;
@@ -333,9 +333,9 @@ typedef union{
   *
   */
 
-int32_t lps22hh_read_reg(lps22hh_ctx_t *ctx, uint8_t reg, uint8_t* data,
+int32_t lps22hh_read_reg(lps22hh_ctx_t *ctx, uint8_t reg, uint8_t *data,
                          uint16_t len);
-int32_t lps22hh_write_reg(lps22hh_ctx_t *ctx, uint8_t reg, uint8_t* data,
+int32_t lps22hh_write_reg(lps22hh_ctx_t *ctx, uint8_t reg, uint8_t *data,
                           uint16_t len);
 
 extern float lps22hh_from_lsb_to_hpa(int16_t lsb);
@@ -381,7 +381,7 @@ int32_t lps22hh_pressure_ref_get(lps22hh_ctx_t *ctx, uint8_t *buff);
 int32_t lps22hh_pressure_offset_set(lps22hh_ctx_t *ctx, uint8_t *buff);
 int32_t lps22hh_pressure_offset_get(lps22hh_ctx_t *ctx, uint8_t *buff);
 
-typedef struct{
+typedef struct {
   lps22hh_int_source_t    int_source;
   lps22hh_fifo_status2_t  fifo_status2;
   lps22hh_status_t        status;
