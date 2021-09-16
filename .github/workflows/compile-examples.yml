@@ -11,6 +11,8 @@ jobs:
       matrix:
         fqbn:
           - STMicroelectronics:stm32:Disco:pnum=B_L4S5I_IOT01A
+          - STMicroelectronics:stm32:Nucleo_64:pnum=NUCLEO_L476RG
+          # - STMicroelectronics:stm32:Disco:pnum=B_U585I_IOT02A
 
     steps:
       - uses: actions/checkout@v2
