@@ -25,9 +25,9 @@
 #define USE_I2C_INTERFACE
 #else
 // Uncomment one communication interface to use:
-// X_NUCLEO_IKS01A3 uses I2C interface
+// X_NUCLEO_IKS01A3 uses I2C interface (set by default)
 // #define USE_SPI_INTERFACE
-// #define USE_I2C_INTERFACE
+#define USE_I2C_INTERFACE
 #endif
 
 #if !defined(USE_SPI_INTERFACE) && !defined(USE_I2C_INTERFACE) || \
