@@ -19,6 +19,11 @@
 // Includes
 #include <LPS22HHSensor.h>
 
+#ifndef LED_BUILTIN
+#define LED_BUILTIN PNUM_NOT_DEFINED
+#warning "LED_BUILTIN is not defined."
+#endif
+
 #define SerialPort  Serial
 
 #if defined(ARDUINO_B_L4S5I_IOT01A) || defined(ARDUINO_B_U585I_IOT02A)
