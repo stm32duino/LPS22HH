@@ -51,9 +51,9 @@
 /* Defines -------------------------------------------------------------------*/
 /* For compatibility with ESP32 platforms */
 #ifdef ESP32
-#ifndef MSBFIRST
-#define MSBFIRST SPI_MSBFIRST
-#endif
+  #ifndef MSBFIRST
+    #define MSBFIRST SPI_MSBFIRST
+  #endif
 #endif
 
 
