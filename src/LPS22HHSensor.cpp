@@ -2,8 +2,8 @@
  ******************************************************************************
  * @file    LPS22HHSensor.cpp
  * @author  SRA
- * @version V1.0.0
- * @date    February 2019
+ * @version V2.1.0
+ * @date    September 2026
  * @brief   Implementation of a LPS22HH pressure sensor.
  ******************************************************************************
  * @attention
@@ -50,6 +50,10 @@
 LPS22HHSensor::LPS22HHSensor(TwoWire *i2c, uint8_t address) : dev_i2c(i2c), address(address)
 {
   dev_spi = NULL;
+#if defined(I3C_SUPPORTED)
+  dev_i3c = NULL;
+#endif
+  bus_type = LPS22HH_I2C_BUS;
   reg_ctx.write_reg = LPS22HH_io_write;
   reg_ctx.read_reg = LPS22HH_io_read;
   reg_ctx.handle = (void *)this;
@@ -67,15 +71,46 @@ LPS22HHSensor::LPS22HHSensor(SPIClass *spi, int cs_pin, uint32_t spi_speed) : de
   reg_ctx.read_reg = LPS22HH_io_read;
   reg_ctx.handle = (void *)this;
   dev_i2c = NULL;
+#if defined(I3C_SUPPORTED)
+  dev_i3c = NULL;
+#endif
+  bus_type = LPS22HH_SPI_4WIRES_BUS;
   address = 0;
   enabled = 0;
 }
+
+#if defined(I3C_SUPPORTED)
+/** Constructor
+ * @param i3c object of an helper class which handles the I3C peripheral
+ * @param static_addr7 the I3C static address of the component's instance
+ */
+LPS22HHSensor::LPS22HHSensor(I3CBus *i3c, uint8_t static_addr7) : dev_i3c(i3c), address(static_addr7), i3c_static7(static_addr7), i3c_dyn7(0)
+{
+  reg_ctx.write_reg = LPS22HH_io_write;
+  reg_ctx.read_reg = LPS22HH_io_read;
+  reg_ctx.handle = (void *)this;
+  dev_i2c = NULL;
+  dev_spi = NULL;
+  bus_type = LPS22HH_I3C_BUS;
+  enabled = 0;
+}
+
+uint8_t LPS22HHSensor::getStaticAddress() const
+{
+  return i3c_static7;
+}
+
+uint8_t LPS22HHSensor::getDynAddress() const
+{
+  return i3c_dyn7;
+}
+#endif
 
 /**
  * @brief  Configure the sensor in order to be used
  * @retval 0 in case of success, an error code otherwise
  */
-LPS22HHStatusTypeDef LPS22HHSensor::begin()
+LPS22HHStatusTypeDef LPS22HHSensor::begin(uint8_t new_address)
 {
   if (dev_spi) {
     // Configure CS pin
@@ -83,9 +118,24 @@ LPS22HHStatusTypeDef LPS22HHSensor::begin()
     digitalWrite(cs_pin, HIGH);
   }
 
-  /* Disable MIPI I3C(SM) interface */
-  if (lps22hh_i3c_interface_set(&reg_ctx, LPS22HH_I3C_DISABLE) != LPS22HH_OK) {
-    return LPS22HH_ERROR;
+#if defined(I3C_SUPPORTED)
+  if (dev_i3c) {
+    uint8_t id = 0;
+    if (new_address < 0x08 || new_address > 0x77) {
+      return LPS22HH_ERROR;
+    }
+    address = new_address;
+    i3c_dyn7 = new_address;
+    if (ReadID(&id) != LPS22HH_OK || id != LPS22HH_ID) {
+      return LPS22HH_ERROR;
+    }
+  } else
+#endif
+  {
+    /* Disable MIPI I3C(SM) interface */
+    if (lps22hh_i3c_interface_set(&reg_ctx, LPS22HH_I3C_DISABLE) != LPS22HH_OK) {
+      return LPS22HH_ERROR;
+    }
   }
 
   /* Power down the device, set Low Noise Enable (bit 5), clear One Shot (bit 4) */
