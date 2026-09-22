@@ -2,8 +2,8 @@
  ******************************************************************************
  * @file    LPS22HHSensor.h
  * @author  SRA
- * @version V1.0.0
- * @date    February 2019
+ * @version V2.1.0
+ * @date    September 2026
  * @brief   Abstract Class of a LPS22HH pressure sensor.
  ******************************************************************************
  * @attention
@@ -48,12 +48,27 @@
 #include "SPI.h"
 #include "lps22hh_reg.h"
 
+#if (defined(I3C1_BASE) || defined(I3C2_BASE)) && !defined(I3C_SUPPORTED)
+  #define I3C_SUPPORTED
+  #include "I3C.h"
+#endif
+
 /* Defines -------------------------------------------------------------------*/
 /* For compatibility with ESP32 platforms */
 #ifdef ESP32
   #ifndef MSBFIRST
     #define MSBFIRST SPI_MSBFIRST
   #endif
+#endif
+
+#define LPS22HH_I2C_BUS                        0U
+#define LPS22HH_SPI_4WIRES_BUS                 1U
+#define LPS22HH_SPI_3WIRES_BUS                 2U
+#define LPS22HH_I3C_BUS                        3U
+
+#if defined(I3C_SUPPORTED)
+  #define LPS22HH_I3C_ADD_L                    0x5CU
+  #define LPS22HH_I3C_ADD_H                    0x5DU
 #endif
 
 
@@ -74,9 +89,16 @@ class LPS22HHSensor {
   public:
     LPS22HHSensor(TwoWire *i2c, uint8_t address = LPS22HH_I2C_ADD_H);
     LPS22HHSensor(SPIClass *spi, int cs_pin, uint32_t spi_speed = 2000000);
-    LPS22HHStatusTypeDef begin();
+#if defined(I3C_SUPPORTED)
+    LPS22HHSensor(I3CBus *i3c, uint8_t static_addr7 = 0);
+#endif
+    LPS22HHStatusTypeDef begin(uint8_t new_address = 0);
     LPS22HHStatusTypeDef end();
     LPS22HHStatusTypeDef ReadID(uint8_t *Id);
+#if defined(I3C_SUPPORTED)
+    uint8_t getStaticAddress() const;
+    uint8_t getDynAddress() const;
+#endif
     LPS22HHStatusTypeDef Enable();
     LPS22HHStatusTypeDef Disable();
     LPS22HHStatusTypeDef GetOutputDataRate(float *Odr);
@@ -149,6 +171,14 @@ class LPS22HHSensor {
         return 0;
       }
 
+#if defined(I3C_SUPPORTED)
+      if (dev_i3c) {
+        if (dev_i3c->readRegBuffer(address, RegisterAddr, pBuffer, NumByteToRead) == 0) {
+          return 0;
+        }
+      }
+#endif
+
       return 1;
     }
 
@@ -193,6 +223,14 @@ class LPS22HHSensor {
         return 0;
       }
 
+#if defined(I3C_SUPPORTED)
+      if (dev_i3c) {
+        if (dev_i3c->writeRegBuffer(address, RegisterAddr, pBuffer, NumByteToWrite) == 0) {
+          return 0;
+        }
+      }
+#endif
+
       return 1;
     }
 
@@ -203,11 +241,20 @@ class LPS22HHSensor {
     /* Helper classes. */
     TwoWire *dev_i2c;
     SPIClass *dev_spi;
+#if defined(I3C_SUPPORTED)
+    I3CBus *dev_i3c;
+#endif
+
+    uint32_t bus_type; /*0 means I2C, 1 means SPI 4-Wires, 2 means SPI-3-Wires, 3 means I3C */
 
     /* Configuration */
     uint8_t address;
     int cs_pin;
     uint32_t spi_speed;
+#if defined(I3C_SUPPORTED)
+    uint8_t i3c_static7;
+    uint8_t i3c_dyn7;
+#endif
 
     lps22hh_odr_t last_odr;
     uint8_t enabled;

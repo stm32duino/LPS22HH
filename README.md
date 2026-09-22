@@ -3,7 +3,7 @@ Arduino library to support the LPS22HH 260-1260 hPa absolute digital output baro
 
 ## API
 
-This sensor uses I2C or SPI to communicate.
+This sensor uses I2C, I3C or SPI to communicate.
 For I2C it is then required to create a TwoWire interface before accessing to the sensors:  
 
     TwoWire dev_i2c(I2C_SDA, I2C_SCL);  
@@ -13,6 +13,10 @@ For SPI it is then required to create a SPI interface before accessing to the se
 
     SPIClass dev_spi(SPI_MOSI, SPI_MISO, SPI_SCK);  
     dev_spi.begin();
+
+For I3C it is then required to create an I3C interface before accessing to the sensors:
+
+    I3C.begin(I3C_SDA, I3C_SCL, 1000000U);
 
 An instance can be created and enabled when the I2C bus is used following the procedure below:  
 
@@ -26,6 +30,15 @@ An instance can be created and enabled when the SPI bus is used following the pr
     PressTemp.begin();
     PressTemp.Enable();
 
+An instance can be created and enabled when the I3C bus is used with SETDASA (static-to-dynamic address assignment):
+
+    LPS22HHSensor PressTemp(&I3C, LPS22HH_I3C_ADD_H);
+    I3C.resetDynamicAddresses();
+    I3C.assignDynamicAddress(PressTemp.getStaticAddress(), LPS22HH_DYNAMIC_ADDRESS);
+    PressTemp.begin(LPS22HH_DYNAMIC_ADDRESS);
+    I3C.setClock(12500000);
+    PressTemp.Enable();
+
 The access to the sensor values is done as explained below:  
 
   Read pressure and temperature.  
@@ -34,6 +47,12 @@ The access to the sensor values is done as explained below:
     float temperature;
     PressTemp.GetPressure(&pressure);  
     PressTemp.GetTemperature(&temperature);
+
+# Examples
+
+There are several examples with the LPS22HH library.
+* LPS22HH_DataLog_Terminal_I2C: This application shows how to get pressure and temperature data from the LPS22HH sensor over I2C and print them on terminal.
+* LPS22HH_Datalog_Terminal_I3C: This application shows how to use the LPS22HH sensor over I3C using SETDASA.
 
 ## Documentation
 
